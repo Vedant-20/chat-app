@@ -14,8 +14,10 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { db ,auth, storage} from '@/firebase/firebase';
 import { updateProfile } from 'firebase/auth';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import UsersPopup from './popup/UsersPopup';
 
 const LeftNav = () => {
+    const [usersPopup, setUsersPopup]=useState(false);
     const [editProfile, setEditProfile]=useState(false);
     const [nameEdited, setNameEdited]=useState(false);
 
@@ -201,9 +203,10 @@ const LeftNav = () => {
         )}
         
         <div className={`flex gap-5  ${editProfile ? "ml-5" : "flex-col items-center"}`}>
-            <Icon size='x-large' className='bg-green-500 hover:bg-green-600' icon={<FiPlus size={24}/>} onClick={()=>{}}/>
+            <Icon size='x-large' className='bg-green-500 hover:bg-green-600' icon={<FiPlus size={24}/>} onClick={()=>setUsersPopup(!usersPopup)}/>
             <Icon size='x-large' className='hover:bg-c2' icon={<IoLogOutOutline size={24}/>} onClick={signOut}/>
         </div>
+        {usersPopup && <UsersPopup onHide={()=>setUsersPopup(false)} title="Find Users"/>}
     </div>
   )
 }

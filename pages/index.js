@@ -1,3 +1,4 @@
+import Chats from '@/components/Chats';
 import LeftNav from '@/components/LeftNav';
 import Loader from '@/components/Loader';
 import { useAuth } from '@/context/authContext'
@@ -27,7 +28,11 @@ const Home = () => {
             <LeftNav/>
 
             <div className='flex bg-c2 grow '>
-                <div>Sidebar</div>
+                <div className='w-[400px] p-5 overflow-auto scrollbar shrink-0 border-r border-white/[0.05] '>
+                  <div className='flex flex-col h-full '> 
+                    <Chats/>
+                  </div>
+                </div>
                 <div>Chat</div>
 
             </div>
