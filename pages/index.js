@@ -1,7 +1,10 @@
+import Chat from '@/components/Chat';
 import Chats from '@/components/Chats';
 import LeftNav from '@/components/LeftNav';
 import Loader from '@/components/Loader';
 import { useAuth } from '@/context/authContext'
+import { useChatContext } from '@/context/chatContext';
+
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react'
 
@@ -11,6 +14,7 @@ const Home = () => {
   const router=useRouter();
 
   const {signOut, currentUser, isLoading}=useAuth();
+  const {data}=useChatContext()
 
 
   useEffect(()=>{
@@ -20,9 +24,7 @@ const Home = () => {
 
   },[currentUser, isLoading])
   return !currentUser ? (<Loader/>) : (
-    // <div>
-    //   <button className='p-5 bg-black' onClick={signOut}>Sign Out</button>
-    // </div>
+    
     <div className='bg-c1 flex h-[100vh]'>
         <div className='flex w-full shrink-0'>
             <LeftNav/>
@@ -33,7 +35,7 @@ const Home = () => {
                     <Chats/>
                   </div>
                 </div>
-                <div>Chat</div>
+                {data.user && <Chat/>}
 
             </div>
 

@@ -14,6 +14,7 @@ module.exports = {
         c3: "#8B8D93",
         c4: "#6b8afd",
         c5: "#2E343D",
+
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
