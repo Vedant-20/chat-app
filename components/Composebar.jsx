@@ -1,22 +1,101 @@
+import { useAuth } from '@/context/authContext'
 import { useChatContext } from '@/context/chatContext'
+import { db, storage } from '@/firebase/firebase'
+import { Timestamp, arrayUnion, doc, serverTimestamp, updateDoc } from 'firebase/firestore'
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage'
 import React from 'react'
 import {TbSend} from 'react-icons/tb'
+import {v4 as uuid} from 'uuid'
 
 const Composebar = () => {
-    const {inputText, setInputText}=useChatContext()
+    const {inputText, setInputText,data,attachment,setAttachment,setAttachmentPreview}=useChatContext()
+    const {currentUser}=useAuth()
 
     const handleTyping=(e)=>{
             setInputText(e.target.value)
     }
 
     const onKeyUp=(e)=>{
-            if(e.key==="Enter" && inputText){
+            if(e.key==="Enter" && (inputText || attachment)){
                 handleSend()
             }
     }
 
-    const handleSend=()=>{
-        
+    const handleSend=async()=>{
+
+      if(attachment){
+        //file uploading logic
+        const storageRef = ref(storage, uuid());
+        const uploadTask = uploadBytesResumable(storageRef, attachment);
+
+        uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+                const progress =
+                    (snapshot.bytesTransferred / snapshot.totalBytes) *
+                    100;
+                console.log("Upload is " + progress + "% done");
+                switch (snapshot.state) {
+                    case "paused":
+                        console.log("Upload is paused");
+                        break;
+                    case "running":
+                        console.log("Upload is running");
+                        break;
+                }
+            },
+            (error) => {
+                console.error(error);
+            },
+            () => {
+                getDownloadURL(uploadTask.snapshot.ref).then(
+                    async (downloadURL) => {
+                      await updateDoc(doc(db,"chats",data.chatId),{
+                        messages: arrayUnion({
+                            id: uuid(),
+                            text: inputText,
+                            sender: currentUser.uid,
+                            date: Timestamp.now(),
+                            read: false,
+                            img: downloadURL
+                        })
+                      })
+                    }
+                );
+            }
+        );
+    }else{
+      await updateDoc(doc(db,"chats",data.chatId),{
+        messages: arrayUnion({
+            id: uuid(),
+            text: inputText,
+            sender: currentUser.uid,
+            date: Timestamp.now(),
+            read: false
+        })
+      })
+    }
+
+
+       
+
+        let msg ={text:inputText}
+        if(attachment){
+          msg.img=true
+        }
+
+        await updateDoc(doc(db,"userChats",currentUser.uid),{
+          [data.chatId + ".lastMessage"]: msg, 
+          [data.chatId + ".date"] : serverTimestamp()
+        })
+
+        await updateDoc(doc(db,"userChats",data.user.uid),{
+          [data.chatId + ".lastMessage"]: msg, 
+          [data.chatId + ".date"] : serverTimestamp()
+        })
+        setInputText("");
+        setAttachment(null);
+        setAttachmentPreview(null)
     }
   return (
     <div className='flex items-center gap-2 grow'>
