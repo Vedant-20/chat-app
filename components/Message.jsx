@@ -5,18 +5,20 @@ import Avatar from './Avatar'
 import { useChatContext } from '@/context/chatContext'
 import Image from 'next/image'
 import ImageViewer from 'react-simple-image-viewer'
-import { Timestamp } from 'firebase/firestore'
+import { Timestamp, doc, getDoc, updateDoc } from 'firebase/firestore'
 import { formateDate, wrapEmojisInHtmlTag } from '@/utils/helpers'
 import Icon from './Icon'
 import {GoChevronDown} from 'react-icons/go'
 import MessageMenu from './MessageMenu'
 import DeleteMsgPopup from './popup/DeleteMsgPopup'
+import { db } from '@/firebase/firebase'
+import { DELETED_FOR_EVERYONE, DELETED_FOR_ME } from '@/utils/constants'
 
 const Message = ({message}) => {
   const [showDeletePopup, setShowDeletePopup]=useState(false)
   const [showMenu, setShowMenu]=useState(false)
   const {currentUser}=useAuth()
-  const {users,data , imageViewer, setImageViewer}=useChatContext()
+  const {users,data , imageViewer, setImageViewer, setEditMsg}=useChatContext()
   const self=message.sender===currentUser.uid
 
   const timestamp = new Timestamp(
@@ -27,11 +29,42 @@ const Message = ({message}) => {
 const date = timestamp.toDate();
 
 const deletePopupHandler=()=>{
-  
+    setShowDeletePopup(true)
+    setShowMenu(false)
+}
+
+const deleteMessage=async(action)=>{
+    try {
+      const messageId=message.id
+      const chatRef=doc(db,"chats",data.chatId)
+
+      const chatDoc= await getDoc(chatRef)
+
+      const updatedMessages=chatDoc.data().messages.map((message)=>{
+          if(message.id===messageId){
+            if(action===DELETED_FOR_ME){
+              message.deletedInfo={
+                [currentUser.uid]: DELETED_FOR_ME
+              }
+            }
+
+            if(action===DELETED_FOR_EVERYONE){
+              message.deletedInfo={
+                deletedForEveryone:true
+              }
+            }
+          }
+          return message
+      })
+      await updateDoc(chatRef,{messages: updatedMessages})
+      setShowDeletePopup(false)
+    } catch (error) {
+      console.error(error)
+    }
 }
   return (
     <div className={`mb-5 max-w-[75%] ${self ? "self-end" :""}`}>
-    {showDeletePopup && <DeleteMsgPopup onHide={()=>setShowDeletePopup(false)} className="DeleteMsgPopup" noHeader={true} shortHeight={true} self={self}/>}
+    {showDeletePopup && <DeleteMsgPopup onHide={()=>setShowDeletePopup(false)} className="DeleteMsgPopup" noHeader={true} shortHeight={true} self={self} deleteMessage={deleteMessage}/>}
       <div className={`flex items-end gap-3 mb-1 ${self ? "justify-start flex-row-reverse" : ""}`}>
         <Avatar size="small" user={self ? currentUser : users[data.user.uid]} className='mb-4'/>
         <div className={`group flex flex-col gap-4 p-4 rounded-3xl relative break-all ${self ? "rounded-br-md bg-c5" : "rounded-bl-md bg-c1"}`}>
@@ -58,7 +91,7 @@ const deletePopupHandler=()=>{
 
         <div className={`${showMenu ? "" : "hidden"} group-hover:flex absolute top-2 ${self ? "left-2 bg-c5" : "right-2 bg-c1"}`} onClick={()=>setShowMenu(true)}>
           <Icon size="medium" className='hover:bg-inherit rounded-none ' icon={<GoChevronDown size={24} className='text-c3'/>}/>
-          {showMenu && <MessageMenu self={self} setShowMenu={setShowMenu} showMenu={showMenu}/>}
+          {showMenu && <MessageMenu self={self} setShowMenu={setShowMenu} showMenu={showMenu} deletePopupHandler={deletePopupHandler} setEditMsg={()=>setEditMsg(message)}/>}
         </div>
       </div>
       </div>

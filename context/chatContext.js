@@ -17,10 +17,21 @@ export const ChatContextProvider=({children})=>{
     const [imageViewer, setImageViewer]=useState(null)
     const {currentUser} = useAuth();
 
+
+    const resetFooterStates=()=>{
+        setInputText("")
+        setAttachment(null)
+        setAttachmentPreview(null)
+        setEditMsg(null)
+        setImageViewer(null)
+    }
+
     const INITIAL_STATE={
         chatId:"",
         user:null
     }
+
+
 
     const chatReducer=(state, action)=>{
         switch (action.type) {
@@ -39,7 +50,7 @@ export const ChatContextProvider=({children})=>{
 
     const [state, dispatch]=useReducer(chatReducer, INITIAL_STATE)
     return(
-        <chatContext.Provider value={{users, setUsers ,data: state, dispatch, chats, setChats, selectedChat, setSelectedChat,inputText, setInputText,attachment, setAttachment,attachmentPreview, setAttachmentPreview,editMsg, setEditMsg,isTyping, setIsTyping,imageViewer, setImageViewer}}>
+        <chatContext.Provider value={{users, setUsers ,data: state, dispatch, chats, setChats, selectedChat, setSelectedChat,inputText, setInputText,attachment, setAttachment,attachmentPreview, setAttachmentPreview,editMsg, setEditMsg,isTyping, setIsTyping,imageViewer, setImageViewer,resetFooterStates}}>
             {children}
         </chatContext.Provider>
     )

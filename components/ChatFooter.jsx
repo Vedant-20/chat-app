@@ -17,7 +17,7 @@ const ChatFooter = () => {
         setInputText((text += emojiData.emoji ))
     }
 
-    const {isTyping, editMsg, setEditMsg, inputText, setInputText, setAttachment, setAttachmentPreview, attachmentPreview}=useChatContext()
+    const {isTyping, editMsg, setEditMsg, inputText, setInputText, setAttachment, setAttachmentPreview, attachmentPreview,data}=useChatContext()
 
 
     const onFileChange=(e)=>{
@@ -60,7 +60,7 @@ const ChatFooter = () => {
         </div>
         {isTyping && <div className='absolute -top-6 left-4 bg-c2 w-full h-6'>
             <div className='flex gap-2 w-full h-full opacity-50 text-sm text-white '>
-                {`User is typing`}
+                {`${data?.user?.displayName} is typing`}
                 <img src='/typing.svg'/>
             </div>
         </div>}

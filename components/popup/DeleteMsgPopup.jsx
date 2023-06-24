@@ -3,6 +3,7 @@ import PopupWrapper from './PopupWrapper'
 import { useAuth } from '@/context/authContext'
 import { useChatContext } from '@/context/chatContext';
 import { RiErrorWarningLine } from 'react-icons/ri';
+import { DELETED_FOR_EVERYONE, DELETED_FOR_ME } from '@/utils/constants';
 
 
 const DeleteMsgPopup = (props) => {
@@ -20,10 +21,10 @@ const DeleteMsgPopup = (props) => {
 
             </div>
           <div className='flex items-center justify-center gap-2 mt-10'>
-                <button onClick={()=>{}} className='border-[2px] border-red-700 py-2 px-4 text-sm rounded-md text-red-500 hover:bg-red-700 hover:text-white'>
+                {props.self && <button onClick={()=>props.deleteMessage(DELETED_FOR_ME)} className='border-[2px] border-red-700 py-2 px-4 text-sm rounded-md text-red-500 hover:bg-red-700 hover:text-white'>
                     Delete for me
-                </button>
-                <button onClick={()=>{}} className='border-[2px] border-red-700 py-2 px-4 text-sm rounded-md text-red-500 hover:bg-red-700 hover:text-white'>
+                </button>}
+                <button onClick={()=>props.deleteMessage(DELETED_FOR_EVERYONE)} className='border-[2px] border-red-700 py-2 px-4 text-sm rounded-md text-red-500 hover:bg-red-700 hover:text-white'>
                     Delete for everyone
                 </button>
                 <button onClick={props.onHide} className='border-[2px] border-white py-2 px-4 text-sm rounded-md text-white hover:bg-white hover:text-emerald-500'>
