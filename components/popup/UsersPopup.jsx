@@ -3,7 +3,7 @@ import PopupWrapper from './PopupWrapper'
 import { useAuth } from '@/context/authContext'
 import { useChatContext } from '@/context/chatContext';
 import Avatar from '../Avatar';
-import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
+import { deleteField, doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase/firebase';
 import Search from '../Search';
 
@@ -62,6 +62,9 @@ const UsersPopup = (props) => {
         }
         else{
           //chat document exists
+          await updateDoc(doc(db,"userChats",currentUser.uid),{
+            [combinedId + ".chatDeleted"]:deleteField()
+          })
         }
         dispatch({
           type: "CHANGE_USER",
@@ -78,7 +81,7 @@ const UsersPopup = (props) => {
         <div className='mt-5 flex flex-col gap-2 grow relative overflow-auto scrollbar'>
           <div className='w-full '>
               {users && Object.values(users).map((user)=>(
-                <div className='flex items-center gap-4 rounded-xl hover:bg-c5 py-2 px-4 cursor-pointer ' onClick={()=>handleSelect(user)}>
+                <div className='flex items-center gap-4 rounded-xl hover:bg-c5 py-2 px-4 cursor-pointer ' key={user.id} onClick={()=>handleSelect(user)}>
                     <Avatar size="large" user={user}/>
                     <div className='flex flex-col gap-1 grow  '>
                       <span className='text-base text-white flex items-center justify-between'>
